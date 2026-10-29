@@ -1,5 +1,5 @@
 # ============================================================================
-# STEP 4: Intune Cross-OS Device Compliance as Code (with 14-Day Grace Period)
+# STEP 4: Intune Cross-OS Device Compliance as Code (with 31-Day Grace Period)
 # Purpose: Define what makes a Windows, Mac, or Linux laptop "Compliant" for 
 #          Conditional Access, without locking out users abruptly mid-workday.
 # ISO 27001 Control: A.8.1 (User Endpoint Devices) & A.8.7 (Malware/EDR)
@@ -24,7 +24,7 @@ variable "os_compliance_baselines" {
       require_disk_encryption = true
       require_firewall        = true
       require_edr_healthy     = true
-      grace_period_days       = 14 # User gets 14 days to remediate before lockout
+      grace_period_days       = 31 # User gets 31 days to remediate before lockout
     }
     macos = {
       display_name            = "INTUNE-COMP-macOS-ISO27001-Baseline"
@@ -32,7 +32,7 @@ variable "os_compliance_baselines" {
       require_disk_encryption = true
       require_firewall        = true
       require_edr_healthy     = true
-      grace_period_days       = 14
+      grace_period_days       = 31
     }
     linux = {
       display_name            = "INTUNE-COMP-UbuntuLinux-RnD-Baseline"
@@ -40,7 +40,7 @@ variable "os_compliance_baselines" {
       require_disk_encryption = true
       require_firewall        = true
       require_edr_healthy     = true
-      grace_period_days       = 14
+      grace_period_days       = 31
     }
   }
 }
