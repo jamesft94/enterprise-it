@@ -38,10 +38,3 @@ resource "azuread_group" "departments" {
     rule    = "(user.accountEnabled -eq true) and (user.department -eq \"${each.value.hr_dept_name}\")"
   }
 }
-
-# 4. Emergency Break-Glass Group (Static / Assigned only via Git PR)
-resource "azuread_group" "break_glass_exclude" {
-  display_name     = "SG-Sec-BreakGlass-Accounts"
-  description      = "Emergency admin accounts excluded from Conditional Access to prevent lockouts"
-  security_enabled = true
-}
