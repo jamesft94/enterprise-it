@@ -1,0 +1,140 @@
+---
+# ============================================================================
+# STEP 5B (DYNAMIC): Zero-Touch Entra ID -> FreeIPA Lifecycle Reconciler
+# Purpose: Dynamically queries Microsoft Graph for current members of
+#          SG-Dept-RnD-Engineering, provisions joiners in FreeIPA, and
+#          reports or removes group membership for users no longer active in Entra.
+# ISO 27001 Control: A.5.18 (Access Rights - Provisioning & Revocation)
+# ============================================================================
+- name: Dynamically Reconcile Entra ID R&D Group with FreeIPA
+  hosts: ipaserver
+  become: false
+  collections:
+    - freeipa.ansible_freeipa
+
+  vars:
+    ipaadmin_password: "{{ lookup('env', 'IPA_ADMIN_PASSWORD') }}"
+    entra_tenant_id: "{{ lookup('env', 'ENTRA_TENANT_ID') }}"
+    entra_client_id: "{{ lookup('env', 'ENTRA_CLIENT_ID') }}"
+    entra_client_secret: "{{ lookup('env', 'ENTRA_CLIENT_SECRET') }}"
+    entra_rnd_group_id: "{{ lookup('env', 'ENTRA_RND_GROUP_ID') }}"
+    apply_deprovisioning: false
+    max_users_to_remove: 5
+
+  tasks:
+    - name: "1. Authenticate to Microsoft Graph API"
+      ansible.builtin.uri:
+        url: "https://login.microsoftonline.com/{{ entra_tenant_id }}/oauth2/v2.0/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          client_id: "{{ entra_client_id }}"
+          client_secret: "{{ entra_client_secret }}"
+          scope: "https://graph.microsoft.com/.default"
+          grant_type: "client_credentials"
+      register: graph_token
+      delegate_to: localhost
+      no_log: true
+
+    - name: "2. Query live members of SG-Dept-RnD-Engineering from Entra ID"
+      ansible.builtin.uri:
+        url: "https://graph.microsoft.com/v1.0/groups/{{ entra_rnd_group_id }}/members/microsoft.graph.user?$select=id,userPrincipalName,givenName,surname,mail,accountEnabled"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ graph_token.json.access_token }}"
+      register: entra_group_response
+      delegate_to: localhost
+      no_log: true
+
+    - name: "3. Initialize the complete Entra membership snapshot"
+      ansible.builtin.set_fact:
+        entra_group_members: "{{ entra_group_response.json.value | default([]) }}"
+        graph_next_link: "{{ entra_group_response.json['@odata.nextLink'] | default('') }}"
+
+    - name: "4. Read remaining Microsoft Graph pages"
+      ansible.builtin.include_tasks: tasks/graph-next-page.yml
+      when: graph_next_link | length > 0
+
+    - name: "5. Require a non-empty membership snapshot before changing FreeIPA"
+      ansible.builtin.assert:
+        that:
+          - entra_group_members | length > 0
+        fail_msg: "The Entra membership snapshot is empty; refusing to reconcile FreeIPA."
+
+    - name: "6. Build active Entra R&D usernames"
+      ansible.builtin.set_fact:
+        entra_active_users: >-
+          {{ entra_group_members
+            | selectattr('accountEnabled', 'equalto', true)
+            | map(attribute='userPrincipalName')
+            | map('regex_replace', '@.*$', '')
+            | list }}
+
+    - name: "7. Ensure FreeIPA 'rnd-developers' group exists"
+      ipausergroup:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "rnd-developers"
+        description: "Dynamically synced from Entra ID SG-Dept-RnD-Engineering"
+        state: present
+      no_log: true
+
+    - name: "8. Fetch current members of 'rnd-developers' in FreeIPA"
+      ansible.builtin.command: >
+        ipa group-show rnd-developers --raw
+      register: ipa_group_raw
+      changed_when: false
+
+    - name: "9. Calculate proposed group membership removals"
+      ansible.builtin.set_fact:
+        ipa_current_members: "{{ ipa_group_raw.stdout_lines | select('match', '^\\s*(member_user|member): uid=') | map('regex_replace', '^\\s*(member_user|member): uid=([^,]+),.*$', '\\2') | list }}"
+
+    - name: "10. Identify FreeIPA users no longer in the Entra group"
+      ansible.builtin.set_fact:
+        users_to_remove: "{{ ipa_current_members | difference(entra_active_users) }}"
+
+    - name: "11. JOINERS: Ensure active Entra R&D engineers exist in FreeIPA"
+      ipauser:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "{{ item.userPrincipalName | regex_replace('@.*$', '') }}"
+        first: "{{ item.givenName }}"
+        last: "{{ item.surname }}"
+        email: "{{ item.mail }}"
+        state: present
+      loop: "{{ entra_group_members | selectattr('accountEnabled', 'equalto', true) | list }}"
+      loop_control:
+        label: "{{ item.userPrincipalName }}"
+      no_log: true
+
+    - name: "12. RBAC: Add active members to FreeIPA 'rnd-developers' group"
+      ipausergroup:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "rnd-developers"
+        user: "{{ entra_active_users }}"
+        state: present
+      when: entra_active_users | length > 0
+      no_log: true
+
+    - name: "13. Report proposed group membership removals"
+      ansible.builtin.debug:
+        var: users_to_remove
+
+    - name: "14. Remove approved leavers from the synchronized FreeIPA group"
+      ansible.builtin.command:
+        argv:
+          - ipa
+          - group-remove-member
+          - rnd-developers
+          - "--users={{ item }}"
+      loop: "{{ users_to_remove }}"
+      when:
+        - apply_deprovisioning | bool
+        - users_to_remove | length > 0
+        - users_to_remove | length <= max_users_to_remove | int
+      changed_when: true
+
+    - name: "15. Stop when the deprovisioning threshold is exceeded"
+      ansible.builtin.assert:
+        that:
+          - users_to_remove | length <= max_users_to_remove | int
+        fail_msg: "Candidate count exceeds max_users_to_remove; review the snapshot and increase the threshold explicitly."
+      when: apply_deprovisioning | bool

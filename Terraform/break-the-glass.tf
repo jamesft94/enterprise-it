@@ -8,16 +8,12 @@
 variable "approved_break_glass_upns" {
   description = "Explicit list of emergency Break-Glass UPNs. Must use cloud-only .onmicrosoft.com domains."
   type        = set(string)
-  default = [
-    "bg-admin-01@sensio.onmicrosoft.com",
-    "bg-admin-02@sensio.onmicrosoft.com"
-  ]
 
   validation {
-    condition = alltrue([
-      for upn in var.approved_break_glass_upns : startswith(upn, "bg-admin-") && endswith(upn, ".onmicrosoft.com")
+    condition = length(var.approved_break_glass_upns) >= 2 && alltrue([
+      for upn in var.approved_break_glass_upns : endswith(upn, ".onmicrosoft.com")
     ])
-    error_message = "Break-glass accounts must start with 'bg-admin-' and use the cloud-only .onmicrosoft.com domain."
+    error_message = "Provide at least two real emergency account UPNs using the tenant's .onmicrosoft.com domain."
   }
 }
 

@@ -1,0 +1,18 @@
+- name: Fetch next Microsoft Graph membership page
+  ansible.builtin.uri:
+    url: "{{ graph_next_link }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ graph_token.json.access_token }}"
+  register: graph_page
+  delegate_to: localhost
+  no_log: true
+
+- name: Append the current page and advance the pagination link
+  ansible.builtin.set_fact:
+    entra_group_members: "{{ entra_group_members + graph_page.json.value }}"
+    graph_next_link: "{{ graph_page.json['@odata.nextLink'] | default('') }}"
+
+- name: Fetch additional membership pages
+  ansible.builtin.include_tasks: graph-next-page.yml
+  when: graph_next_link | length > 0

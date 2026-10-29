@@ -4,4 +4,10 @@
 *.tfplan
 tfplan
 terraform.tfvars
+*.tfvars
+*.tfvars.json
 crash.log
+ansible-retry/
+*.retry
+.venv/
+__pycache__/

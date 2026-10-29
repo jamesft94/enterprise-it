@@ -1,10 +1,18 @@
-## 🛡️ Enterprise IT Change Request (ISO 27001 Annex A.8.32)
+## Enterprise IT Change Request
 
-### 1. What is changing and why?
-<!-- Brief 1-2 sentence description of the policy, group, or FreeIPA change -->
+### Change
+<!-- What changes, why it is needed, and who is affected? -->
 
-### 2. Operational Safety & "Monitor-First" Checklist
-- [ ] **Monitor-First Verified:** Any new Conditional Access or Intune rule is set to `enabledForReportingButNotEnforced` (or 7-day grace period) for a 14-day burn-in.
-- [ ] **Break-Glass Protected:** Emergency group `SG-Sec-BreakGlass-Accounts` is excluded from any blocking policy.
-- [ ] **24/7 Care Operations Impact:** Checked sign-in logs / blast radius to ensure zero disruption to round-the-clock staff.
-- [ ] **Rollback Plan:** Reverting this commit (`git revert`) cleanly restores previous state.
+### Risk and rollout
+- [ ] Scope, dependencies, and affected users/devices are identified.
+- [ ] Report-only or check-mode results have been reviewed where supported.
+- [ ] Break-glass access and 24/7 operational impact have been checked.
+- [ ] Rollout stages, observation window, success criteria, and owner are recorded.
+- [ ] Rollback steps have been tested or reviewed, including out-of-band recovery.
+
+### Validation
+- [ ] Relevant format, syntax, validation, or test commands pass.
+- [ ] Terraform plan or Ansible diff has been reviewed; no secrets or tenant data are included.
+
+**Validation evidence:**
+<!-- Link checks, plan summary, or relevant logs with sensitive data removed. -->

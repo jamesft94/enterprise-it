@@ -9,8 +9,8 @@
   hosts: linux_workstations
   become: true
   vars:
-    # Monitor-First: Set false to only audit existing dev machines; true for Day-1 provisioning
-    enforce_changes: true
+    # Audit is the default; set true only after reviewing the target inventory.
+    enforce_changes: false
     edr_package: "mdatp" # Microsoft Defender for Endpoint (or 'falcon-sensor' for CrowdStrike)
     baseline_packages:
       - curl
@@ -18,6 +18,7 @@
       - vim
       - unattended-upgrades
       - freeipa-client
+      - "{{ edr_package }}"
 
   tasks:
     - name: "1. BASELINE: Install R&D baseline packages and FreeIPA client"

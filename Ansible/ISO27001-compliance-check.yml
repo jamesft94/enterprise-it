@@ -12,17 +12,36 @@
     edr_service_name: "falcon-sensor" # Example: CrowdStrike / Defender for Endpoint (mdatp)
 
   tasks:
-    - name: "AUDIT 1: Verify Root Filesystem uses LUKS Full Disk Encryption"
-      ansible.builtin.command: lsblk -f
-      register: lsblk_output
+    - name: "AUDIT 1A: Identify the root filesystem source"
+      ansible.builtin.command:
+        argv:
+          - findmnt
+          - --noheadings
+          - --output
+          - SOURCE
+          - /
+      register: root_filesystem_source
+      changed_when: false
+
+    - name: "AUDIT 1: Inspect encryption backing the root filesystem"
+      ansible.builtin.command:
+        argv:
+          - lsblk
+          - --noheadings
+          - --paths
+          - --inverse
+          - --output
+          - FSTYPE
+          - "{{ root_filesystem_source.stdout }}"
+      register: root_filesystem_types
       changed_when: false
 
     - name: "REPORT 1: Flag compliance status for Full Disk Encryption"
       ansible.builtin.debug:
         msg: >
-          {{ 'COMPLIANT: LUKS encryption detected.'
-             if 'crypto_LUKS' in lsblk_output.stdout
-             else 'NON-COMPLIANT: No LUKS volume found on host ' ~ inventory_hostname }}
+           {{ 'COMPLIANT: LUKS encryption detected in the root device backing chain.'
+             if 'crypto_LUKS' in root_filesystem_types.stdout
+             else 'NON-COMPLIANT: No LUKS backing device found for root on ' ~ inventory_hostname }}
 
     - name: "AUDIT 2: Check EDR Agent service state without restarting workloads"
       ansible.builtin.systemd:

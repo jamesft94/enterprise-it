@@ -1,5 +1,5 @@
 # ============================================================================
-# STEP 4: Intune Cross-OS Device Compliance as Code (with 31-Day Grace Period)
+# STEP 4: Illustrative Intune Cross-OS Device Compliance Payloads
 # Purpose: Define what makes a Windows, Mac, or Linux laptop "Compliant" for 
 #          Conditional Access, without locking out users abruptly mid-workday.
 # ISO 27001 Control: A.8.1 (User Endpoint Devices) & A.8.7 (Malware/EDR)
@@ -45,7 +45,8 @@ variable "os_compliance_baselines" {
   }
 }
 
-# 2. Construct the Microsoft Graph Device Compliance Payloads
+# 2. Construct illustrative Microsoft Graph payloads. This file does not create
+#    or assign Intune policies; a reviewed deployment integration is required.
 locals {
   intune_graph_payloads = {
     for os_key, policy in var.os_compliance_baselines : os_key => {
@@ -59,15 +60,15 @@ locals {
       defenderEnabled               = policy.require_edr_healthy
       deviceThreatProtectionEnabled = policy.require_edr_healthy
 
-      # THE SECRET SAUCE: Scheduled Action for Rule (7-Day Grace Period)
-      # Instead of marking Non-Compliant on Day 0, give the user 7 days to update/fix!
+      # This sample payload models a remediation window; verify supported rule
+      # names and platform-specific schema before sending it to Microsoft Graph.
       scheduledActionsForRule = [
         {
           ruleName = "PasswordRequired"
           scheduledActionConfigurations = [
             {
               actionType             = "block"
-              gracePeriodHours       = policy.grace_period_days * 24 # 168 Hours (7 Days)
+              gracePeriodHours       = policy.grace_period_days * 24
               notificationTemplateId = "00000000-0000-0000-0000-000000000000"
             }
           ]
@@ -86,6 +87,6 @@ locals {
 
 # 3. Output the Graph API payloads so CI/CD (or az rest / msgraph provider) applies them
 output "intune_compliance_policies_planned" {
-  description = "Declarative Intune Compliance Policies ready for MS Graph /deviceManagement/deviceCompliancePolicies"
+  description = "Illustrative payloads only; no Intune policies or assignments are created by this configuration."
   value       = local.intune_graph_payloads
 }

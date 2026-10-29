@@ -9,16 +9,15 @@ variable "ca_policies" {
   }))
 
   default = {
-    # Policy 1: Baseline MFA for all active staff (Already burned-in & enforced)
+    # Start in report-only mode; enforcement requires an explicit reviewed change.
     baseline_mfa_all_staff = {
       display_name     = "CA001-Global-Require-MFA-All-Active-Staff"
-      state            = "enabled"
+      state            = "enabledForReportingButNotEnforced"
       target_group_key = "all"
       grant_controls   = ["mfa"]
       session_hours    = 24
     }
 
-    # Policy 2: Require Intune/Compliant Device for R&D (Currently in 14-day Monitor-First mode!)
     rnd_require_compliant_device = {
       display_name     = "CA002-RnD-Require-Compliant-Device [Monitor-First]"
       state            = "enabledForReportingButNotEnforced"
@@ -31,8 +30,15 @@ variable "ca_policies" {
   # Guardrail: Prevent typos in policy states
   validation {
     condition = alltrue([
-      for k, v in var.ca_policies : contains(["enabled", "disabled", "enabledForReportingButNotEnforced"], v.state)
+      for policy in values(var.ca_policies) : contains(["enabled", "disabled", "enabledForReportingButNotEnforced"], policy.state)
     ])
     error_message = "State must be 'enabledForReportingButNotEnforced', 'enabled', or 'disabled'."
+  }
+
+  validation {
+    condition = alltrue([
+      for policy in values(var.ca_policies) : policy.target_group_key == "all" || contains(keys(var.department_groups), policy.target_group_key)
+    ])
+    error_message = "Each target_group_key must be 'all' or a key in department_groups."
   }
 }
