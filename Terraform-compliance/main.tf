@@ -4,10 +4,8 @@
 #          while guaranteeing Break-Glass accounts are never locked out.
 # ISO 27001 Control: A.5.15 (Access Control) & A.8.5 (Secure Authentication)
 # ============================================================================
-
 resource "azuread_conditional_access_policy" "zero_trust_policies" {
   for_each = var.ca_policies
-
   display_name = each.value.display_name
   state        = each.value.state
 
