@@ -1,0 +1,102 @@
+---
+# ============================================================================
+# STEP 5B (DYNAMIC): Zero-Touch Entra ID -> FreeIPA Lifecycle Reconciler
+# Purpose: Dynamically queries Microsoft Graph for current members of
+#          SG-Dept-RnD-Engineering, provisions joiners in FreeIPA, and
+#          automatically disables anyone who was offboarded or removed in Entra.
+# ISO 27001 Control: A.5.18 (Access Rights - Provisioning & Revocation)
+# ============================================================================
+- name: Dynamically Reconcile Entra ID R&D Group with FreeIPA
+  hosts: ipaserver
+  become: false
+  collections:
+    - freeipa.ansible_freeipa
+
+  vars:
+    ipaadmin_password: "{{ lookup('env', 'IPA_ADMIN_PASSWORD') }}"
+    entra_tenant_id: "{{ lookup('env', 'ENTRA_TENANT_ID') }}"
+    entra_client_id: "{{ lookup('env', 'ENTRA_CLIENT_ID') }}"
+    entra_client_secret: "{{ lookup('env', 'ENTRA_CLIENT_SECRET') }}"
+    entra_rnd_group_id: "{{ lookup('env', 'ENTRA_RND_GROUP_ID') }}"
+
+  tasks:
+    - name: "1. Authenticate to Microsoft Graph API"
+      ansible.builtin.uri:
+        url: "https://login.microsoftonline.com/{{ entra_tenant_id }}/oauth2/v2.0/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          client_id: "{{ entra_client_id }}"
+          client_secret: "{{ entra_client_secret }}"
+          scope: "https://graph.microsoft.com/.default"
+          grant_type: "client_credentials"
+      register: graph_token
+      delegate_to: localhost
+      no_log: true
+
+    - name: "2. Query live members of SG-Dept-RnD-Engineering from Entra ID"
+      ansible.builtin.uri:
+        url: "https://graph.microsoft.com/v1.0/groups/{{ entra_rnd_group_id }}/members?$select=id,userPrincipalName,givenName,surname,mail,accountEnabled"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ graph_token.json.access_token }}"
+      register: entra_group_response
+      delegate_to: localhost
+
+    - name: "3. Build dynamic list of active Entra R&D usernames (prefix before @)"
+      ansible.builtin.set_fact:
+        entra_active_users: >-
+          {{
+            entra_group_response.json.value
+            | selectattr('accountEnabled', 'equalto', true)
+            | map(attribute='userPrincipalName')
+            | map('regex_replace', '@.*$', '')
+            | list
+          }}
+
+    - name: "4. Ensure FreeIPA 'rnd-developers' group exists"
+      ipausergroup:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "rnd-developers"
+        description: "Dynamically synced from Entra ID SG-Dept-RnD-Engineering"
+        state: present
+
+    - name: "5. Fetch current members of 'rnd-developers' in FreeIPA"
+      ansible.builtin.command: >
+        ipa group-show rnd-developers --raw
+      register: ipa_group_raw
+      changed_when: false
+
+    - name: "6. Calculate LEAVERS (Users in FreeIPA group who are NO LONGER in Entra R&D group)"
+      ansible.builtin.set_fact:
+        ipa_current_members: "{{ ipa_group_raw.stdout_lines | select('match', '^\\s*member: uid=') | map('regex_replace', '^\\s*member: uid=([^,]+),.*$', '\\1') | list }}"
+
+    - name: "7. Identify orphaned/offboarded FreeIPA accounts to disable"
+      ansible.builtin.set_fact:
+        users_to_disable: "{{ ipa_current_members | difference(entra_active_users) }}"
+
+    - name: "8. JOINERS: Ensure all active Entra R&D engineers exist in FreeIPA"
+      ipauser:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "{{ item.userPrincipalName | regex_replace('@.*$', '') }}"
+        first: "{{ item.givenName }}"
+        last: "{{ item.surname }}"
+        email: "{{ item.mail }}"
+        state: present
+      loop: "{{ entra_group_response.json.value | selectattr('accountEnabled', 'equalto', true) | list }}"
+      loop_control:
+        label: "{{ item.userPrincipalName }}"
+
+    - name: "9. RBAC: Sync exact active membership into FreeIPA 'rnd-developers' group"
+      ipausergroup:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "rnd-developers"
+        user: "{{ entra_active_users }}"
+        state: present
+
+    - name: "10. LEAVERS: Automatically disable FreeIPA accounts no longer in Entra R&D group"
+      ipauser:
+        ipaadmin_password: "{{ ipaadmin_password }}"
+        name: "{{ item }}"
+        state: disabled
+      loop: "{{ users_to_disable }}"
