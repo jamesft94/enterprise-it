@@ -1,0 +1,8 @@
+employee_id,first_name,last_name,department,job_title,status
+1001,Kari,Nordmann,Engineering,Head of Engineering,active
+1002,Ola,Hansen,Operations,Operations Coordinator,active
+1003,Ingrid,Bakken,Sales,Account Manager,leaver
+1004,Lars,Ødegård,Finance,Controller,active
+1005,Maria,Lie,Operations,COO,active
+1006,Sofie,Strand,Engineering,Backend Developer,active
+1007,Emil,Johansen,Support,Support Specialist,pending
