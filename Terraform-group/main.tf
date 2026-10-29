@@ -12,7 +12,6 @@ terraform {
 }
 
 
-# 2. Global Baseline Group: Every Active Employee
 resource "azuread_group" "all_active_employees" {
   display_name     = "All-Active-Employees"
   description      = "Base M365 & Intune licensing group for all active staff"
