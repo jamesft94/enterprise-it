@@ -1,2 +1,0 @@
-# Copy to terraform.tfvars and set your tenant's domain.
-domain = "contoso.onmicrosoft.com"

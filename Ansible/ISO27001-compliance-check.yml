@@ -1,0 +1,40 @@
+---
+# ============================================================================
+# SENSIO ENTERPRISE IT BLUEPRINT: Non-Disruptive Linux Endpoint Compliance
+# Purpose: Audit Linux developer machines for ISO 27001 controls (Disk
+#          Encryption, EDR health, Security Patching) before enforcing changes.
+# ============================================================================
+- name: Linux Workstation Security & Compliance Baseline (Monitor-First)
+  hosts: linux_workstations
+  become: true
+  vars:
+    enforce_remediation: false # Default to audit-only; set true after team sign-off
+    edr_service_name: "falcon-sensor" # Example: CrowdStrike / Defender for Endpoint (mdatp)
+
+  tasks:
+    - name: "AUDIT 1: Verify Root Filesystem uses LUKS Full Disk Encryption"
+      ansible.builtin.command: lsblk -f
+      register: lsblk_output
+      changed_when: false
+
+    - name: "REPORT 1: Flag compliance status for Full Disk Encryption"
+      ansible.builtin.debug:
+        msg: >
+          {{ 'COMPLIANT: LUKS encryption detected.'
+             if 'crypto_LUKS' in lsblk_output.stdout
+             else 'NON-COMPLIANT: No LUKS volume found on host ' ~ inventory_hostname }}
+
+    - name: "AUDIT 2: Check EDR Agent service state without restarting workloads"
+      ansible.builtin.systemd:
+        name: "{{ edr_service_name }}"
+      register: edr_status
+      failed_when: false
+
+    - name: "REMEDIATE 2 (Only if enforce_remediation=true): Ensure EDR Agent is active"
+      ansible.builtin.systemd:
+        name: "{{ edr_service_name }}"
+        state: started
+        enabled: true
+      when:
+        - enforce_remediation | bool
+        - edr_status.status.ActiveState | default('inactive') != 'active'
