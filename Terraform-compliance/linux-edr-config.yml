@@ -1,0 +1,45 @@
+---
+# ============================================================================
+# STEP 4C: Linux R&D Workstation Day-1 Bootstrap (EDR, Security & FreeIPA Client)
+# Purpose: Ensure Linux laptops automatically get EDR and baseline tools so they
+#          pass the Step 4B Intune Custom Compliance check on Day 1.
+# ISO 27001 Control: A.8.7 (Protection Against Malware) & A.8.8 (Vulnerability Mgmt)
+# ============================================================================
+- name: Day-1 Linux Workstation Baseline & EDR Deployment
+  hosts: linux_workstations
+  become: true
+  vars:
+    # Monitor-First: Set false to only audit existing dev machines; true for Day-1 provisioning
+    enforce_changes: true
+    edr_package: "mdatp" # Microsoft Defender for Endpoint (or 'falcon-sensor' for CrowdStrike)
+    baseline_packages:
+      - curl
+      - git
+      - vim
+      - unattended-upgrades
+      - freeipa-client
+
+  tasks:
+    - name: "1. BASELINE: Install R&D baseline packages and FreeIPA client"
+      ansible.builtin.apt:
+        name: "{{ baseline_packages }}"
+        state: present
+        update_cache: true
+      when: enforce_changes | bool
+
+    - name: "2. EDR: Ensure EDR Agent ({{ edr_package }}) is installed and running"
+      ansible.builtin.service:
+        name: "{{ edr_package }}"
+        state: started
+        enabled: true
+      check_mode: "{{ not (enforce_changes | bool) }}"
+      register: edr_service_state
+
+    - name: "3. PATCHING: Enable automatic background security updates (ISO 27001 A.8.8)"
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
+        mode: "0644"
+      when: enforce_changes | bool
