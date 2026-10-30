@@ -4,6 +4,12 @@
 #          while guaranteeing Break-Glass accounts are never locked out.
 # ISO 27001 Control: A.5.15 (Access Control) & A.8.5 (Secure Authentication)
 # ============================================================================
+
+
+## This resource is subject to a restrictive API request limit of 1 request/second. 
+## Whilst Terraform will automatically back-off and retry throttled requests, 
+## if you have a large number of resource changes to make, you may wish to reduce 
+## parallelism or specify extended custom resource timeouts.
 resource "azuread_conditional_access_policy" "zero_trust_policies" {
   for_each     = var.ca_policies
   display_name = each.value.display_name
@@ -11,6 +17,8 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
 
   conditions {
     client_app_types = ["browser", "mobileAppsAndDesktopClients"]
+    sign_in_risk_levels = ["low", "medium", "high"]
+    user_risk_levels    = ["low", "medium", "high"]
 
     applications {
       included_applications = ["All"]
