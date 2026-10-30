@@ -1,11 +1,11 @@
 variable "ca_policies" {
   description = "Conditional Access policies with explicit rollout state control"
   type = map(object({
-    display_name    = string
-    state           = string # Must be: enabledForReportingButNotEnforced, enabled, or disabled
+    display_name     = string
+    state            = string # Must be: enabledForReportingButNotEnforced, enabled, or disabled
     target_group_key = string # "all" or a key from var.department_groups (e.g., "rnd")
-    grant_controls  = list(string)
-    session_hours   = number
+    grant_controls   = list(string)
+    session_hours    = number
   }))
 
   default = {

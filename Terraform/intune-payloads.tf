@@ -9,9 +9,9 @@
 variable "os_compliance_baselines" {
   description = "Minimum ISO 27001 endpoint security requirements across Windows, macOS, and Linux"
   type = map(object({
-    display_name           = string
-    os_platform            = string
-    require_disk_encryption = bool   # BitLocker (Win), FileVault (Mac), LUKS (Linux)
+    display_name            = string
+    os_platform             = string
+    require_disk_encryption = bool # BitLocker (Win), FileVault (Mac), LUKS (Linux)
     require_firewall        = bool
     require_edr_healthy     = bool   # Defender for Endpoint / CrowdStrike active
     grace_period_days       = number # "Monitor-First" buffer before blocking access!
@@ -52,7 +52,7 @@ locals {
     for os_key, policy in var.os_compliance_baselines : os_key => {
       displayName = policy.display_name
       description = "Managed by Terraform. Enforces encryption, EDR, and firewall with a ${policy.grace_period_days}-day grace period."
-      
+
       # Core Security Controls (BitLocker / FileVault / LUKS + Firewall + EDR)
       bitLockerEnabled              = policy.os_platform == "windows10AndLater" ? policy.require_disk_encryption : null
       storageRequireEncryption      = policy.require_disk_encryption
