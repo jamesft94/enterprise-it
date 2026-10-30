@@ -23,14 +23,15 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
     applications {
       included_applications = ["All"]
     }
-
+    
+  #  In the Microsoft Entra admin center this condition was renamed from Location to Network; 
+  #  this is a portal label change only and the underlying API is unchanged.
     locations {
       included_locations = ["All"]
       excluded_locations = ["AllTrusted"]
     }
 
     users {
-      # Dynamically target either All Active Employees or a specific Department Group from Step 2
       included_groups = [
         each.value.target_group_key == "all"
         ? azuread_group.all_active_employees.object_id
