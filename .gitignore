@@ -10,4 +10,3 @@ crash.log
 ansible-retry/
 *.retry
 .venv/
-__pycache__/
