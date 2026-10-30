@@ -1,6 +1,6 @@
 ---
 # ============================================================================
-# SENSIO ENTERPRISE IT BLUEPRINT: Non-Disruptive Linux Endpoint Compliance
+# Sensio Enterprise IT Blueprint: Non-Disruptive Linux Endpoint Compliance
 # Purpose: Audit Linux developer machines for ISO 27001 controls (Disk
 #          Encryption, EDR health, Security Patching) before enforcing changes.
 # ============================================================================

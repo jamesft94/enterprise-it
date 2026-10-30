@@ -2,6 +2,13 @@
 
 A small reference repository for identity lifecycle, access policy, Linux endpoint compliance, and infrastructure-as-code practices. It is a portfolio/lab, not a production deployment or an implementation for Sensio. Organization names and tenant-specific values are examples; replace them with approved values before use.
 
+## Design principles
+
+- Automate how IT is run with infrastructure as code, Git, peer review, and reproducible changes.
+- Simplify and prioritize: understand why things are the way they are, then make them simpler.
+- Build security into how things work without unnecessary bureaucracy; monitor first and enforce later.
+- Establish clear ownership for reliable operations and continuous improvement.
+
 ## Repository map
 
 | Path | Purpose |
