@@ -5,6 +5,7 @@ variable "ca_policies" {
     state            = string # Must be: enabledForReportingButNotEnforced, enabled, or disabled
     target_group_key = string # "all" or a key from var.department_groups (e.g., "rnd")
     grant_controls   = list(string)
+    operator         = string # "AND" or "OR"
     session_hours    = number
   }))
 
@@ -15,6 +16,7 @@ variable "ca_policies" {
       state            = "enabledForReportingButNotEnforced"
       target_group_key = "all"
       grant_controls   = ["mfa"]
+      operator         = "OR"
       session_hours    = 24
     }
 
@@ -23,6 +25,7 @@ variable "ca_policies" {
       state            = "enabledForReportingButNotEnforced"
       target_group_key = "rnd"
       grant_controls   = ["mfa", "compliantDevice"]
+      operator         = "AND"
       session_hours    = 12
     }
   }
