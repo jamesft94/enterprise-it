@@ -24,6 +24,11 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
       included_applications = ["All"]
     }
 
+    locations {
+      included_locations = ["All"]
+      excluded_locations = ["AllTrusted"]
+    }
+
     users {
       # Dynamically target either All Active Employees or a specific Department Group from Step 2
       included_groups = [
