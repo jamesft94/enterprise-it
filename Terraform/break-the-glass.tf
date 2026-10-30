@@ -4,7 +4,6 @@
 # ISO 27001 Control: A.5.15 (Access Control) & A.8.2 (Privileged Access Rights)
 # ============================================================================
 
-# 1. Explicit list of approved emergency accounts (Changes require a Git PR)
 variable "approved_break_glass_upns" {
   description = "Explicit list of emergency Break-Glass UPNs. Must use cloud-only .onmicrosoft.com domains."
   type        = set(string)
