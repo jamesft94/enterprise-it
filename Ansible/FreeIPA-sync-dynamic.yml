@@ -71,7 +71,7 @@
             | list }}
 
     - name: "7. Ensure FreeIPA 'rnd-developers' group exists"
-      ipausergroup:
+      freeipa.ansible_freeipa.ipausergroup:
         ipaadmin_password: "{{ ipaadmin_password }}"
         name: "rnd-developers"
         description: "Dynamically synced from Entra ID SG-Dept-RnD-Engineering"
@@ -93,7 +93,7 @@
         users_to_remove: "{{ ipa_current_members | difference(entra_active_users) }}"
 
     - name: "11. JOINERS: Ensure active Entra R&D engineers exist in FreeIPA"
-      ipauser:
+      freeipa.ansible_freeipa.ipauser:
         ipaadmin_password: "{{ ipaadmin_password }}"
         name: "{{ item.userPrincipalName | regex_replace('@.*$', '') }}"
         first: "{{ item.givenName }}"
