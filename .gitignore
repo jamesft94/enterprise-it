@@ -5,7 +5,7 @@
 tfplan
 *.tfvars
 *.tfvars.json
-!terraform.tfvars
+terraform.tfvars
 crash.log
 ansible-retry/
 *.retry
