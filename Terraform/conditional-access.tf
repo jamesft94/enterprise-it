@@ -29,8 +29,8 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
       included_applications = ["All"]
     }
 
-  #  In the Microsoft Entra admin center this condition was renamed from Location to Network; 
-  #  this is a portal label change only and the underlying API is unchanged.
+    #  In the Microsoft Entra admin center this condition was renamed from Location to Network; 
+    #  this is a portal label change only and the underlying API is unchanged.
     locations {
       included_locations = ["All"]
       excluded_locations = ["AllTrusted"]
@@ -57,9 +57,9 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
 
   session_controls {
     application_enforced_restrictions_enabled = false
-    disable_resilience_defaults                = false
-    persistent_browser_mode = "never" 
-    sign_in_frequency        = each.value.session_hours
-    sign_in_frequency_period = "hours"
+    disable_resilience_defaults               = false
+    persistent_browser_mode                   = "never"
+    sign_in_frequency                         = each.value.session_hours
+    sign_in_frequency_period                  = "hours"
   }
 }
