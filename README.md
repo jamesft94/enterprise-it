@@ -28,6 +28,12 @@ A small reference repository for identity lifecycle, access policy, Linux endpoi
 
 The Intune Terraform file currently produces illustrative payload data only. It does not create or assign Intune policies. The Linux playbooks also depend on a prepared inventory, supported distributions, configured package repositories, and credentials supplied outside the repository.
 
+## Next steps
+
+- Add a PowerShell-based employee offboarding workflow with reviewable, auditable steps.
+- Replace the illustrative Intune payloads with real policies and assignments.
+- Add certificate-based authentication for automation.
+
 ## Safety and scope
 
 The repository is intentionally conservative: Conditional Access defaults to report-only, endpoint changes default to audit mode, and FreeIPA group removals are opt-in. These are sample guardrails, not a substitute for tenant-specific design, testing, operational approval, or incident procedures. See [the architecture notes](docs/architecture.md) for limitations and next steps.
