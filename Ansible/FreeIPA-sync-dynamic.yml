@@ -1,6 +1,6 @@
 ---
 # ============================================================================
-# STEP 5B (DYNAMIC): Zero-Touch Entra ID -> FreeIPA Lifecycle Reconciler
+# Zero-Touch Entra ID -> FreeIPA Lifecycle Reconciler
 # Purpose: Dynamically queries Microsoft Graph for current members of
 #          SG-Dept-RnD-Engineering, provisions joiners in FreeIPA, and
 #          reports or removes group membership for users no longer active in Entra.

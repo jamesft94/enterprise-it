@@ -1,5 +1,5 @@
 # ============================================================================
-# STEP 5A: Bind FreeIPA Authentication to Entra ID R&D Dynamic Group
+# Bind FreeIPA Authentication to Entra ID R&D Dynamic Group
 # Purpose: Allow FreeIPA (v4.9.10+ External IdP) to authenticate R&D users 
 #          via Entra ID OIDC + MFA, scoped strictly to SG-Dept-RnD-Engineering.
 # ============================================================================

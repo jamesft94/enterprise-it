@@ -1,6 +1,6 @@
 ---
 # ============================================================================
-# STEP 4C: Linux R&D Workstation Day-1 Bootstrap (EDR, Security & FreeIPA Client)
+# Linux R&D Workstation Day-1 Bootstrap (EDR, Security & FreeIPA Client)
 # Purpose: Ensure Linux laptops automatically get EDR and baseline tools so they
 #          pass the Step 4B Intune Custom Compliance check on Day 1.
 # ISO 27001 Control: A.8.7 (Protection Against Malware) & A.8.8 (Vulnerability Mgmt)

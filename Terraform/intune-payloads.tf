@@ -1,5 +1,5 @@
 # ============================================================================
-# STEP 4: Illustrative Intune Cross-OS Device Compliance Payloads
+# Illustrative Intune Cross-OS Device Compliance Payloads
 # Purpose: Define what makes a Windows, Mac, or Linux laptop "Compliant" for 
 #          Conditional Access, without locking out users abruptly mid-workday.
 # ISO 27001 Control: A.8.1 (User Endpoint Devices) & A.8.7 (Malware/EDR)
@@ -45,8 +45,7 @@ variable "os_compliance_baselines" {
   }
 }
 
-# 2. Construct illustrative Microsoft Graph payloads. This file does not create
-#    or assign Intune policies; a reviewed deployment integration is required.
+# This file does not create or assign Intune policies; a reviewed deployment integration is required.
 locals {
   intune_graph_payloads = {
     for os_key, policy in var.os_compliance_baselines : os_key => {
