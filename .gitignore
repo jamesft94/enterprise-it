@@ -3,9 +3,9 @@
 *.tfstate.*
 *.tfplan
 tfplan
-terraform.tfvars
 *.tfvars
 *.tfvars.json
+!terraform.tfvars
 crash.log
 ansible-retry/
 *.retry
