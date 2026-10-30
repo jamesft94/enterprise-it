@@ -25,9 +25,6 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
 
   conditions {
     client_app_types = ["browser", "mobileAppsAndDesktopClients"]
-    sign_in_risk_levels = ["low", "medium", "high"]
-    user_risk_levels    = ["low", "medium", "high"]
-
     applications {
       included_applications = ["All"]
     }
