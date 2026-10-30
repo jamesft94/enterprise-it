@@ -71,7 +71,7 @@
             | list }}
 
     - name: "7. Ensure FreeIPA 'rnd-developers' group exists"
-      freeipa.ansible_freeipa.ipausergroup:
+      freeipa.ansible_freeipa.ipagroup:
         ipaadmin_password: "{{ ipaadmin_password }}"
         name: "rnd-developers"
         description: "Dynamically synced from Entra ID SG-Dept-RnD-Engineering"
@@ -106,7 +106,7 @@
       no_log: true
 
     - name: "12. RBAC: Add active members to FreeIPA 'rnd-developers' group"
-      freeipa.ansible_freeipa.ipausergroup:
+      freeipa.ansible_freeipa.ipagroup:
         ipaadmin_password: "{{ ipaadmin_password }}"
         name: "rnd-developers"
         user: "{{ entra_active_users }}"
