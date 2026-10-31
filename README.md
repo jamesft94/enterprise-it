@@ -1,6 +1,6 @@
 # Enterprise IT Engineering Portfolio
 
-A small reference repository for identity lifecycle, access policy, Linux endpoint compliance, and infrastructure-as-code practices. It is a portfolio/lab, not a production deployment or an implementation for Sensio. Organization names and tenant-specific values are examples; replace them with approved values before use.
+A small reference repository for identity lifecycle, access policy, Linux endpoint compliance, and infrastructure-as-code practices. It is a portfolio/lab, not a production deployment or an implementation for any company. Organization names and tenant-specific values are examples; replace them with approved values before use.
 
 ## Design principles
 

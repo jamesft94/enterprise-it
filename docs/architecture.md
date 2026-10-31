@@ -4,7 +4,7 @@
 
 This repository demonstrates a compact Enterprise IT automation portfolio. Terraform is a single root because its Entra group, Conditional Access, break-glass, and FreeIPA application resources reference one another directly. Ansible remains separate because it performs host and identity operations rather than provisioning those Entra resources.
 
-All organization names, addresses, identifiers, redirect URIs, and sample data are illustrative. This repository is not affiliated with Sensio and is not ready to apply to a real tenant or fleet without replacing those values and completing the controls below.
+All organization names, addresses, identifiers, redirect URIs, and sample data are illustrative. This repository is not affiliated with any corporation and is not ready to apply to a real tenant or fleet without replacing those values and completing the controls below.
 
 ## Change flow
 
