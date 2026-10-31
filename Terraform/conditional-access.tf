@@ -37,10 +37,9 @@ resource "azuread_conditional_access_policy" "zero_trust_policies" {
     }
 
     users {
-      included_groups = [
-        each.value.target_group_key == "all"
-        ? azuread_group.all_active_employees.object_id
-        : azuread_group.departments[each.value.target_group_key].object_id
+      included_users = each.value.target_group_key == "all" ? ["All"] : []
+      included_groups = each.value.target_group_key == "all" ? [] : [
+        azuread_group.departments[each.value.target_group_key].object_id
       ]
 
       # SAFETY NET: Always exclude our Authoritative Break-Glass Group 
