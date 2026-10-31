@@ -12,7 +12,7 @@ variable "ca_policies" {
   default = {
     # Start in report-only mode; enforcement requires an explicit reviewed change.
     baseline_mfa_all_staff = {
-      display_name     = "CA001-Global-Require-MFA-All-Active-Staff"
+      display_name     = "CA001-Global-Require-MFA-All-Users"
       state            = "enabledForReportingButNotEnforced"
       target_group_key = "all"
       grant_controls   = ["mfa"]
