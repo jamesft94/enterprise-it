@@ -1,5 +1,5 @@
 variable "department_groups" {
-  description = "Map of Sensio departments and the HR attribute value that triggers membership"
+  description = "Map of departments and the HR attribute value that triggers membership"
   type = map(object({
     display_name = string
     description  = string

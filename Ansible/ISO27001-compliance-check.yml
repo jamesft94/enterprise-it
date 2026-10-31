@@ -1,6 +1,6 @@
 ---
 # ============================================================================
-# Sensio Enterprise IT Blueprint: Non-Disruptive Linux Endpoint Compliance
+# Enterprise IT Blueprint: Non-Disruptive Linux Endpoint Compliance
 # Purpose: Audit Linux developer machines for ISO 27001 controls (Disk
 #          Encryption, EDR health, Security Patching) before enforcing changes.
 # ============================================================================
@@ -39,9 +39,9 @@
     - name: "REPORT 1: Flag compliance status for Full Disk Encryption"
       ansible.builtin.debug:
         msg: >
-           {{ 'COMPLIANT: LUKS encryption detected in the root device backing chain.'
-             if 'crypto_LUKS' in root_filesystem_types.stdout
-             else 'NON-COMPLIANT: No LUKS backing device found for root on ' ~ inventory_hostname }}
+          {{ 'COMPLIANT: LUKS encryption detected in the root device backing chain.'
+            if 'crypto_LUKS' in root_filesystem_types.stdout
+            else 'NON-COMPLIANT: No LUKS backing device found for root on ' ~ inventory_hostname }}
 
     - name: "AUDIT 2: Check EDR Agent service state without restarting workloads"
       ansible.builtin.systemd:
